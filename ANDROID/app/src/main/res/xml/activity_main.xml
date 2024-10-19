@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:gravity="center_horizontal"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/title"
+        android:textAppearance="@style/title"
+        android:layout_marginTop="24dp" />
+
+    <ImageView
+        android:id="@+id/image_central"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/imagen_central"
+        android:layout_below="@id/title"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/heading"
+        android:textAppearance="@style/heading"
+        android:layout_below="@id/image_central"
+        android:layout_marginTop="24dp"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/paragraph"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/paragraph"
+        android:textAppearance="@style/paragraph"
+        android:layout_below="@id/heading"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:paddingHorizontal="16dp" />
+
+    <Button
+        android:id="@+id/button_confirmar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/paragraph"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:text="@string/confirmar"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#0F172A"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="12dp"
+        android:textSize="16sp"
+        android:elevation="4dp"/>
+</RelativeLayout>

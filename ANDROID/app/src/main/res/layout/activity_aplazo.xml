@@ -1,0 +1,31 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <TextView
+        android:id="@+id/tv_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Alerta Aplazada"
+        android:textSize="24sp"
+        android:textColor="#0F172A" />
+
+    <TextView
+        android:id="@+id/tv_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tiempo restante: 10:00 segundos"
+        android:textSize="16sp"
+        android:textColor="#334155"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/button_cancel_aplazo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancelar aplazo"
+        android:layout_marginTop="24dp"/>
+</LinearLayout>
