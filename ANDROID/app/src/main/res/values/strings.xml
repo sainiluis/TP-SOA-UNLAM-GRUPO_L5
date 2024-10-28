@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">SmartCareShake</string>
-    <string name="sensor_unsupported" />
-    <string name="title">Smartcare Alert</string>
-    <string name="heading">Estado Alerta</string>
-    <string name="paragraph">Su paciente requiere atención. Confirme la asistencia agitando el dispositivo o presionando el botón.</string>
-    <string name="confirmar">Confirmar</string>
-</resources>
