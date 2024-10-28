@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -33,6 +34,8 @@ android {
 
 dependencies {
 
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation ("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

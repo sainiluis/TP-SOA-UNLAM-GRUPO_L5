@@ -1,56 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center_horizontal"
-    android:background="#FFFFFF">
+    tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="@string/title"
-        android:textAppearance="@style/title" />
-
-    <ImageView
-        android:id="@+id/image_central"
-        android:layout_width="wrap_content"
-        android:layout_height="372dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:layout_weight="2"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/imagen_central" />
-
-    <TextView
-        android:id="@+id/heading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/heading"
-        android:textAppearance="@style/heading"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="24dp" />
-
-    <TextView
-        android:id="@+id/paragraph"
+    <!-- RelativeLayout para contener los elementos -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/paragraph"
-        android:textAppearance="@style/paragraph"
-        android:gravity="center"
-        android:layout_marginTop="16dp"
-        android:paddingHorizontal="16dp" />
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/button_aplazar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Aplazar"
-        android:layout_marginTop="24dp"/>
-</LinearLayout>
+        <!-- Imagen de fondo, va al principio para que quede detrás -->
+        <ImageView
+            android:id="@+id/background_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_splash" />
+
+        <!-- Vista que será animada (cortina) -->
+        <ImageView
+            android:id="@+id/curtain_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/cortina2" />
+
+        <!-- Nueva imagen agregada cerca del top -->
+        <ImageView
+            android:id="@+id/new_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="0dp"
+            android:src="@drawable/logo2" />
+		
+			
+		<TextView
+    android:id="@+id/txtValorEstado"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Este es el estado actual :"
+    android:textColor="#000000"
+    android:background="@android:color/transparent"
+    android:visibility="invisible"
+    android:layout_above="@id/button_start"
+    android:layout_centerHorizontal="true"
+    android:layout_marginBottom="10dp"
+    android:padding="10dp"
+    android:textSize="16sp" />
+        <Button
+            android:id="@+id/button_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ver Estados"
+            android:layout_below="@id/new_image"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp" />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
