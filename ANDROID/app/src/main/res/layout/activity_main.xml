@@ -12,13 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Imagen de fondo, va al principio para que quede detrás -->
+        <!-- Imagen de fondo -->
         <ImageView
             android:id="@+id/background_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/image_splash" />
+            android:src="@drawable/background_activity_main" />
 
         <!-- Vista que será animada (cortina) -->
         <ImageView
@@ -26,40 +26,89 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
-            android:src="@drawable/cortina2" />
+            android:src="@drawable/background_activity_main" />
 
         <!-- Nueva imagen agregada cerca del top -->
         <ImageView
             android:id="@+id/new_image"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="390dp"
+            android:src="@drawable/logo2" />
+
+        <!-- Contenedor de estado actual -->
+        <LinearLayout
+            android:id="@+id/status_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/new_image"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="0dp"
-            android:src="@drawable/logo2" />
-		
-			
-		<TextView
-    android:id="@+id/txtValorEstado"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Este es el estado actual :"
-    android:textColor="#000000"
-    android:background="@android:color/transparent"
-    android:visibility="invisible"
-    android:layout_above="@id/button_start"
-    android:layout_centerHorizontal="true"
-    android:layout_marginBottom="10dp"
-    android:padding="10dp"
-    android:textSize="16sp" />
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:padding="10dp"
+            android:background="@android:color/transparent">
+
+            <!-- Título del estado -->
+            <TextView
+                android:id="@+id/txtEstadoTitulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado Actual:"
+                android:textSize="22sp"
+                android:textColor="#000000"
+                android:paddingBottom="8dp"
+                android:textStyle="bold" />
+
+            <!-- Estado general -->
+            <TextView
+                android:id="@+id/txtValorEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Monitoreando..."
+                android:textSize="20sp"
+                android:textColor="#00796B" />
+
+            <!-- Sensor Llamado -->
+            <TextView
+                android:id="@+id/txtSensorLlamado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sensor Llamado: Desconocido"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:layout_marginTop="10dp" />
+
+            <!-- Sensor Orina -->
+            <TextView
+                android:id="@+id/txtSensorOrina"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sensor Orina: Desconocido"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:layout_marginTop="5dp" />
+
+            <!-- Sensor Presión -->
+            <TextView
+                android:id="@+id/txtSensorPresion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sensor Presión: Desconocido"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:layout_marginTop="5dp" />
+        </LinearLayout>
+
+        <!-- Botón para ver estados -->
         <Button
             android:id="@+id/button_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ver Estados"
-            android:layout_below="@id/new_image"
+            android:layout_below="@id/status_container"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp" />
-
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

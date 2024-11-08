@@ -20,10 +20,14 @@ public class SplashActivity extends AppCompatActivity {
         Animation slideLeft = AnimationUtils.loadAnimation(this, R.anim.slide_left);
         splashImage.startAnimation(slideLeft);
 
+        // Se usa este handler  para retrasar la ejecución de la main activity
+        // Y esperar a que el splash haya terminado
+        int splashScreenDuration = 1400; // Duración del splash en milisegundos
         new Handler().postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, SecondActivity.class);
+            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
+            //overridePendingTransition(0, 0);
             finish();
-        }, Constants.DELAY_SPLASH);
+        }, splashScreenDuration);
     }
 }

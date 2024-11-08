@@ -30,35 +30,27 @@
         android:theme="@style/Theme.SmartCareShake"
         tools:targetApi="31">
 
-        <!-- SplashActivity -->
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SmartCareShake">
-
-        </activity>
-
         <!--MainActivity -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SmartCareShake">
+            android:name=".SplashActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <activity android:name=".SecondActivity"
+            android:exported="false">
+        </activity>
+
+        <activity android:name=".MainActivity"
+            android:exported="false">
+        </activity>
+
         <activity
-            android:name=".SecondActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SmartCareShake">
-        </activity>
-
-        <activity android:name=".AplazoActivity">
-
-        </activity>
+            android:name=".AplazoActivity"
+            android:exported="false" />
 
     </application>
 

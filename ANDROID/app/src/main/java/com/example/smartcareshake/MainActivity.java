@@ -3,6 +3,7 @@ package com.example.smartcareshake;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -48,66 +49,61 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.i(TAG, "Ejecuta: OnCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //txtJson=(TextView)findViewById(R.id.txtJson);
-        txtEstado=(TextView)findViewById(R.id.txtValorEstado);
-
-
-        // Encontrar la vista de la cortina y el botón
-        curtainView = findViewById(R.id.curtain_view);
-        button_start = findViewById(R.id.button_start);
+        txtEstado = findViewById(R.id.txtValorEstado);
         logoView = findViewById(R.id.new_image);
-        //txt_main = findViewById(R.id.txt_main);
+        button_start = findViewById(R.id.button_start);
 
-        // Ocultar el botón al inicio
-        button_start.setVisibility(View.INVISIBLE);
-        logoView.setVisibility(View.INVISIBLE);
+        // Hacer visibles txtEstado y logoView directamente
+        txtEstado.setVisibility(View.VISIBLE);
+        logoView.setVisibility(View.VISIBLE);
 
-        // Cargar la animación
-        Animation animation = AnimationUtils.loadAnimation(this, R.anim.curtain_open);
-
-        // Aplicar la animación
-        curtainView.startAnimation(animation);
-
-        // Listener para manejar el final de la animación
-        animation.setAnimationListener(new Animation.AnimationListener() {
+        // Configurar el botón sin necesidad de la animación de cortina
+        button_start.setVisibility(View.VISIBLE);
+        button_start.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                // Ocultar la vista de la cortina y mostrar el botón
-                curtainView.setVisibility(View.GONE);
-                button_start.setVisibility(View.VISIBLE);
-                txtEstado.setVisibility(View.VISIBLE);
-                button_start.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(MainActivity.this, SplashActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-                logoView.setVisibility(View.VISIBLE);
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                startActivity(intent);
+                finish();
             }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
         });
+
+        ImageView logoView = findViewById(R.id.new_image);
+        Animation rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate);
+        logoView.startAnimation(rotateAnimation);
 
         mqttHandler = new MqttHandler(getApplicationContext());
 
-        connect();
+        if (mqttHandler != null) {
+            Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
+        } else {
+            Log.i(TAG, "mqttHandler es null");
+        }
 
-        configurarBroadcastReciever();
+
+        if (!mqttHandler.isConnected()) {
+            // Configuramos el Broadcast receiver
+
+            configurarBroadcastReciever();
+
+            // Usamos este handler para que la conexión se haga unos ms después. ya que si no el pasaje del splash a la MainActivity no era ligero y se trababa.
+            new Handler().postDelayed(() -> connect(), 500); // 500 ms de retraso
+        }
+
+
 
 
     }
 
     private void connect()
     {
+
         mqttHandler.connect(mqttHandler.BROKER_URL,mqttHandler.CLIENT_ID, mqttHandler.USER, mqttHandler.PASS);
 
 
@@ -115,7 +111,13 @@ public class MainActivity extends AppCompatActivity {
 
             Thread.sleep(1000);
             //subscribeToTopic(MqttHandler.TOPIC_BOTON);
-            subscribeToTopic(MqttHandler.TOPIC_TEMPERATURA);
+            subscribeToTopic(MqttHandler.SMART_CARE_ORINO);
+
+            Log.d("Main activity","Conectado correctamente");
+            Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
+
+
+
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -156,8 +158,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        connect(); // Reconecta MQTT al volver
+
         Log.i(TAG, "Ejecuta: OnResume");
+        Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
+
+        // Crear un Handler para ejecutar la reconexión con un retraso de 5 segundos
+        new Handler().postDelayed(() -> {
+            if (mqttHandler != null && !mqttHandler.isConnected()) {
+                Log.i(TAG, "Reconectando MQTT después de 5 segundos en onResume...");
+                connect();
+            }
+        }, 5000); // 5000 milisegundos = 5 segundos de delay
+
+
+
+
     }
 
     @Override
@@ -169,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mqttHandler.disconnect(); // Desconecta MQTT al salir de la actividad
+        //mqttHandler.disconnect(); // Desconecta MQTT al salir de la actividad
         Log.i(TAG, "Ejecuta: OnPause");
     }
 
@@ -203,8 +218,9 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
 
             Toast.makeText(getApplicationContext(),"Conexion Perdida",Toast.LENGTH_SHORT).show();
-
+            Log.i(TAG,"Intentando conexión");
             connect();
+            Log.i(TAG,"Conectado");
 
         }
 
@@ -214,18 +230,52 @@ public class MainActivity extends AppCompatActivity {
     public class ReceptorOperacion extends BroadcastReceiver {
 
         public void onReceive(Context context, Intent intent) {
+            // Referencias a los TextView para actualizar los valores
+            TextView txtValorEstado = findViewById(R.id.txtValorEstado);
+            TextView txtSensorLlamado = findViewById(R.id.txtSensorLlamado);
+            TextView txtSensorOrina = findViewById(R.id.txtSensorOrina);
+            TextView txtSensorPresion = findViewById(R.id.txtSensorPresion);
 
-            //Se obtiene los valores que envio el servicio atraves de un untent
-            //NOtAR la utilizacion de un objeto Bundle es opcional.
+            // Obtener el JSON recibido a través del Intent
             String msgJson = intent.getStringExtra("msgJson");
-            txtJson.setText(msgJson);
+            if (msgJson != null) {
+                Log.i("MAIN ACTIVITY", msgJson);
+            }
 
             try {
+                // Crear el objeto JSON a partir del mensaje recibido
                 JSONObject jsonObject = new JSONObject(msgJson);
-                String value = jsonObject.getString("value");
-                txtEstado.setText(value+"°");
+
+                // Extraer y mostrar el estado general
+                String estado = jsonObject.getString("estado");
+                txtValorEstado.setText("Estado Actual: " + estado);
+
+                // Extraer y mostrar el valor del sensor de llamado
+                String sensorLlamado = jsonObject.getString("llamado");
+                txtSensorLlamado.setText("Sensor Llamado: " + sensorLlamado);
+
+                // Extraer y mostrar el valor del sensor de orina
+                String sensorOrina = jsonObject.getString("orina");
+                txtSensorOrina.setText("Sensor Orina: " + sensorOrina);
+
+                // Extraer y mostrar el valor del sensor de presión
+                String sensorPresion = jsonObject.getString("presion");
+                txtSensorPresion.setText("Sensor Presión: " + sensorPresion);
+
+                // Verificar si el estado requiere abrir SecondActivity
+                if ("PacienteLlamo".equals(estado) || "PacienteOrino".equals(estado) || "PacienteSeLevanto".equals(estado)) {
+                    // Desconectar MQTT antes de cambiar de actividad
+                    mqttHandler.disconnect();
+
+                    // Ir a SecondActivity y finalizar MainActivity
+                    Intent secondActivityIntent = new Intent(context, SecondActivity.class);
+                    context.startActivity(secondActivityIntent);
+                    ((MainActivity) context).finish(); // Finalizar MainActivity
+                }
+
             } catch (JSONException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                Log.e("MAIN ACTIVITY", "Error al procesar JSON: " + e.getMessage());
             }
         }
 
