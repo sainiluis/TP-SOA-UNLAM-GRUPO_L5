@@ -15,8 +15,8 @@
 // Definición de Constantes
 #define TIEMPO_INTERVALO_BUZZER 3000
 #define TIEMPO_LEER_SENSORES    500     // Cada cuanto tiempo se leerán los sensores sin aplazo
-#define TIEMPO_TIMEOUT          60000   // Cada cuanto tiempo se producirá un evento de timeout
-#define UMBRAL_PRESION          250  // 250   // Valor de presión a detectar para que se considere que hay algo encima del sensor
+#define TIEMPO_TIMEOUT          10000   // Cada cuanto tiempo se producirá un evento de timeout
+#define UMBRAL_PRESION          250     // Valor de presión a detectar para que se considere que hay algo encima del sensor
 #define UMBRAL_HUMEDAD          2000    // Valor de humedad a detectar para que se considere que haya orina en el papagayo
 
 //Variables de tiempo de los sensores
@@ -80,7 +80,7 @@ bool sensar_pulsador(pulsador*, eventos); //Función para obtener el valor de cu
 #define TOPICO_PAUSADO      TOPICO_GENERAL //"/smartcare/pausado"
 #define TOPICO_ORINO        TOPICO_GENERAL //"/smartcare/orino"
 #define TOPICO_PULSO        TOPICO_GENERAL //"/smartcare/pulso"
-#define TOPICO_APLAZO       TOPICO_GENERAL //"/smartcare/aplazo"
+#define TOPICO_APLAZO       "/smartcare/aplazo"
 
 extern const char* ssid;
 extern const char* password;

@@ -427,7 +427,7 @@ void informarOrino()
     }
   */
 
-  mqttInformarEstado(TOPICO_ORINO, {"estado","humedad"}, {"Paciente Orino", "X"}, PIN_HUMEDAD);
+  mqttInformarEstado(TOPICO_ORINO, {"estado","valorSensor"}, {"Paciente Orino", "X"}, PIN_HUMEDAD);
 }
 
 void informarLevanto()
@@ -441,7 +441,7 @@ void informarLevanto()
     }
   */
 
-  mqttInformarEstado(TOPICO_LEVANTO, {"estado","presion"}, {"Paciente Se Levanto", "X"}, PIN_PRESION);
+  mqttInformarEstado(TOPICO_LEVANTO, {"estado","valorSensor"}, {"Paciente Se Levanto", "X"}, PIN_PRESION);
 }
 
 void informarConfirmacion()
@@ -515,7 +515,7 @@ String obtenerJson(std::vector<const char*> claves, std::vector<const char*> val
   json = "{\n";
   //while( clave != claves.end() && valor != valores.end() )
   while( clave != claves.end() && valor != valores.end())
-    json += "\"" + (String) *clave++ + "\": \"" + (String) *valor++ + "\",\n";
+    json += "\"" + (String) *clave++ + "\": \"" + (String) *valor++ + ( valor != valores.end() ? "\"," : "\"" ) + "\n";
   json += "}";
 
   return json;
