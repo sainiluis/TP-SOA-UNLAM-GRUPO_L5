@@ -194,7 +194,4 @@
  C:/Users/Agustin/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
  C:/Users/Agustin/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
  C:/Users/Agustin/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
- .pio/libdeps/esp32doit-devkit-v1/PubSubClient/src/PubSubClient.h \
- .pio/libdeps/esp32doit-devkit-v1/ArduinoJson/src/ArduinoJson.h \
- .pio/libdeps/esp32doit-devkit-v1/ArduinoJson/src/ArduinoJson.hpp \
- .pio/libdeps/esp32doit-devkit-v1/ArduinoJson/src/ArduinoJson/Configuration.hpp
+ .pio/libdeps/esp32doit-devkit-v1/PubSubClient/src/PubSubClient.h

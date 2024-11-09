@@ -4,6 +4,7 @@
 #include <evento.h>
 #include <Wire.h>
 #include "rgb_lcd.h"
+#include <vector>
 
 //Pines de los actuadores
 #define PIN_BUZZER        32
@@ -59,7 +60,11 @@ void pacienteSeLevanto          ();
 void wifiConnect                ();
 void callback                   (char*, byte*, unsigned int);
 void mqttReconnect              ();
-String generateJson             ();
-void mqttInformarEstado         (const char*, const char*);
+void mqttInformarEstado         (const char*, std::initializer_list<const char *>, std::initializer_list<const char *>, int pin = -1);
+String obtenerJson              (std::vector<const char*>, std::vector<const char*>);
+
+//void armarJson                  (const char* clave, const char* valor, char* mensaje);
+//void intToChar                  (int valor, char* str);
+//void obtenerJsonValor           (char* clave, int pin, char* texto);
 
 #endif
