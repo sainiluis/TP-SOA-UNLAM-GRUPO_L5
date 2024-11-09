@@ -4,5 +4,6 @@
     <string name="title">Smartcare Alert</string>
     <string name="heading">Estado Alerta</string>
     <string name="paragraph">Su paciente requiere atención. Confirme la asistencia agitando el dispositivo o presionando el botón.</string>
+    <string name="paragraph_main_principal">Su paciente está siendo monitoreado correctamente.</string>
     <string name="confirmar">Confirmar</string>
 </resources>

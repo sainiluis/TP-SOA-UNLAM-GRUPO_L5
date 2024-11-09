@@ -1,64 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:orientation="vertical"
-    android:padding="16dp"
     android:gravity="center_horizontal"
-    android:background="#FFFFFF">
+    android:padding="16dp">
 
+    <!-- Título de la alerta -->
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
         android:text="@string/title"
         android:textAppearance="@style/title" />
 
+    <!-- Imagen central -->
     <ImageView
         android:id="@+id/image_central"
         android:layout_width="wrap_content"
-        android:layout_height="372dp"
-        android:layout_gravity="center"
+        android:layout_height="300dp"
         android:layout_marginTop="16dp"
-        android:layout_weight="2"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:src="@drawable/imagen_central" />
 
-    <TextView
-        android:id="@+id/heading"
+    <!-- Botón que muestra el estado de la alerta -->
+    <Button
+        android:id="@+id/button_estado_alerta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/heading"
-        android:textAppearance="@style/heading"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:backgroundTint="#A8DAB5"
+        android:text="Estado: No disponible"
+        android:textColor="#000000"
+        android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/paragraph"
-        android:layout_width="match_parent"
+    <!-- Botón que muestra el valor del sensor -->
+    <Button
+        android:id="@+id/button_valor_sensor"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/paragraph"
-        android:textAppearance="@style/paragraph"
-        android:gravity="center"
         android:layout_marginTop="16dp"
-        android:paddingHorizontal="16dp" />
+        android:backgroundTint="#A8DAB5"
+        android:text="Valor sensor: No disponible"
+        android:textColor="#000000"
+        android:textSize="16sp" />
 
+    <!-- Botón para aplazar la alerta -->
     <Button
         android:id="@+id/button_aplazar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Aplazar"
-        android:layout_marginTop="24dp"/>
-		
-	<Button
-    android:id="@+id/button_volver_main"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:text="Volver a Inicio"
-    android:layout_marginTop="16dp"/>
+        android:layout_marginTop="24dp"
+        android:text="Aplazar" />
+
+
 </LinearLayout>
