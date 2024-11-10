@@ -1,7 +1,6 @@
 #include <evento.h>
 #include <WiFi.h>
 #include "PubSubClient.h"
-#include <ArduinoJson.h>
 
 //No se pueden declarar valores de variables en el archivo header
 //por lo que se tiene que ejecutar este código para que se
@@ -18,8 +17,8 @@ bool aplazado = false;
 bool recibido_mensaje_aplazo = false;
 
 //Configuración del wifi y el servidor mqtt
-const char* ssid        = "SO Avanzados";
-const char* password    = "SOA.2019";
+const char* ssid        = "FIDO";
+const char* password    = "48268426";
 const char* mqttServer  = "broker.emqx.io";
 const char* user_name   = "";
 const char* user_pass   = "";

@@ -15,8 +15,8 @@
 // Definición de Constantes
 #define TIEMPO_INTERVALO_BUZZER 3000
 #define TIEMPO_LEER_SENSORES    500     // Cada cuanto tiempo se leerán los sensores sin aplazo
-#define TIEMPO_TIMEOUT          60000   // Cada cuanto tiempo se producirá un evento de timeout
-#define UMBRAL_PRESION          250  // 250   // Valor de presión a detectar para que se considere que hay algo encima del sensor
+#define TIEMPO_TIMEOUT          10000   // Cada cuanto tiempo se producirá un evento de timeout
+#define UMBRAL_PRESION          250     // Valor de presión a detectar para que se considere que hay algo encima del sensor
 #define UMBRAL_HUMEDAD          2000    // Valor de humedad a detectar para que se considere que haya orina en el papagayo
 
 //Variables de tiempo de los sensores
@@ -69,15 +69,17 @@ extern pulsador pulsadorLlamar, pulsadorAplazar, pulsadorConfirmar;
 bool sensar_pulsador(pulsador*, eventos); //Función para obtener el valor de cualquier pulsador
 
 //Variables para la configuración del Wifi y la comunicación mediante MQTT
-#define TAMANIO_STRING_VALOR_SENSOR 10  //Define el tamaño que tendrá el string que guardará el valor de un sensor
+#define BASE_STRING_VALOR_SENSOR    10
+#define TAMANIO_STRING_VALOR_SENSOR 10
 #define TAMANIO_MENSAJE_MQTT        100
 
 //Definición de tópicos de MQTT
-#define TOPICO_LEVANTO      "/smartcare/levanto"
-#define TOPICO_CONFIRMADO   "/smartcare/confirmado"
-#define TOPICO_PAUSADO      "/smartcare/pausado"
-#define TOPICO_ORINO        "/smartcare/orino"
-#define TOPICO_PULSO        "/smartcare/pulso"
+#define TOPICO_GENERAL      "/smartcare"
+#define TOPICO_LEVANTO      TOPICO_GENERAL //"/smartcare/levanto"
+#define TOPICO_CONFIRMADO   TOPICO_GENERAL //"/smartcare/confirmado"
+#define TOPICO_PAUSADO      TOPICO_GENERAL //"/smartcare/pausado"
+#define TOPICO_ORINO        TOPICO_GENERAL //"/smartcare/orino"
+#define TOPICO_PULSO        TOPICO_GENERAL //"/smartcare/pulso"
 #define TOPICO_APLAZO       "/smartcare/aplazo"
 
 extern const char* ssid;

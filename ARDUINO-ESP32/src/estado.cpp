@@ -405,54 +405,142 @@ void cambiarFondoLCD(colores color){
 
 void informarPulsoPaciente()
 {
-    Serial.println("El paciente ha pulsado el botón de llamada.");
-    mqttInformarEstado(TOPICO_PULSO, "El paciente ha llamado");    
+  Serial.println("El paciente ha pulsado el botón de llamada.");
+
+  /*
+    {
+      "estado": "Paciente Llamo",
+    }
+  */
+
+  mqttInformarEstado(TOPICO_PULSO, {"estado"}, {"Paciente Llamo"});
 }
 
 void informarOrino()
 {
   Serial.println("El paciente se ha orinado.");
 
-  int valorHumedad = analogRead(PIN_PRESION);
-  char valorHumedadStr[TAMANIO_STRING_VALOR_SENSOR];
-  itoa(valorHumedad, valorHumedadStr, TAMANIO_STRING_VALOR_SENSOR);
- 
-  char mensaje[TAMANIO_MENSAJE_MQTT]; 
-  strcpy(mensaje, "El paciente se ha orinado, humedad: ");
-  strcat(mensaje, valorHumedadStr);
- 
-  mqttInformarEstado(TOPICO_ORINO, mensaje);
+  /*
+    {
+      "estado": "Paciente Orino",
+      "presion": 512
+    }
+  */
+
+  mqttInformarEstado(TOPICO_ORINO, {"estado","valorSensor"}, {"Paciente Orino", "X"}, PIN_HUMEDAD);
 }
 
 void informarLevanto()
 {
   Serial.println("El paciente se ha levantado.");
- 
-  int valorPresion = analogRead(PIN_PRESION);
-  char valorPresionStr[TAMANIO_STRING_VALOR_SENSOR];
-  itoa(valorPresion, valorPresionStr, TAMANIO_STRING_VALOR_SENSOR);
- 
-  char mensaje[TAMANIO_MENSAJE_MQTT]; 
-  strcpy(mensaje, "El paciente se ha levantado, presion: ");
-  strcat(mensaje, valorPresionStr);
- 
-  mqttInformarEstado(TOPICO_LEVANTO, mensaje);
+
+  /*
+    {
+      "estado": "Paciente Se Levanto",
+      "presion": 1234
+    }
+  */
+
+  mqttInformarEstado(TOPICO_LEVANTO, {"estado","valorSensor"}, {"Paciente Se Levanto", "X"}, PIN_PRESION);
 }
 
 void informarConfirmacion()
 {
   Serial.println("Se ha confirmado la llamada del paciente.");
-  mqttInformarEstado(TOPICO_CONFIRMADO, "Se ha confirmado la llamada del paciente.");
+
+  /*
+    {
+      "confirmar": "true"
+    }
+  */
+
+  mqttInformarEstado(TOPICO_CONFIRMADO, {"confirmar"}, {"true"});
 }
 
 void informarPausaActuadores()
 {
   Serial.println("Se han pausado los actuadores.");
-  mqttInformarEstado(TOPICO_PAUSADO, "Se han pausado los actuadores.");
 }
 
-void mqttInformarEstado(const char* topico, const char* mensaje)
+/*
+  para que se guarde un valor hay que pasarle X como valor, esta función reemplazará esa X por el valor del pin dado
+  Solo soporta la lectura de UN SOLO PIN a la vez, y solo hace una lectura analógica
+*/
+void mqttInformarEstado(const char* topico, std::initializer_list<const char *> claves, std::initializer_list<const char *> valores, int pin)
 {    
-    //Se publica un mensaje en un topico del broker
-    client.publish(topico, mensaje);
+  String json;
+
+  //Inicialización de variables para guardar texto
+  char mensaje[TAMANIO_MENSAJE_MQTT];
+  char valorSensor[TAMANIO_STRING_VALOR_SENSOR];
+  std::vector<const char*> vClaves;
+  std::vector<const char*> vValores;
+
+  //guardamos claves en vector de claves
+  for(const char* clave: claves)
+  {
+    vClaves.push_back(clave);
+  }
+    
+  //Conversión de int a char
+  if(pin != -1)
+    itoa(analogRead(pin), valorSensor, BASE_STRING_VALOR_SENSOR);
+
+  //guardamos valores en vector de valores
+  for(const char* valor: valores)
+  {
+    //Buscamos el valor con X y lo reemplazamos
+    if(pin != -1 && strcmp(valor, "X") == 0)
+      vValores.push_back(valorSensor);
+    else
+      vValores.push_back(valor);
+  }
+
+  //Armamos el json y lo guardamos en mensaje
+  json = obtenerJson(vClaves, vValores);
+  json.toCharArray(mensaje, json.length()+1);
+
+  //Se publica un mensaje en un topico del broker
+  Serial.println(mensaje);
+  client.publish(topico, mensaje);
 }
+
+//Funciones String JSON
+String obtenerJson(std::vector<const char*> claves, std::vector<const char*> valores){
+
+  String json;
+  auto clave = claves.begin();
+  auto valor = valores.begin();
+
+  json = "{\n";
+  //while( clave != claves.end() && valor != valores.end() )
+  while( clave != claves.end() && valor != valores.end())
+    json += "\"" + (String) *clave++ + "\": \"" + (String) *valor++ + ( valor != valores.end() ? "\"," : "\"" ) + "\n";
+  json += "}";
+
+  return json;
+}
+
+/*
+// Funciones JSON
+void obtenerJson(const char* clave, const char* valor, char* mensaje){
+  strcpy(mensaje, "{\n\"");
+  strcat(mensaje, clave);
+  strcat(mensaje, "\": ");
+  strcat(mensaje, valor);
+  strcat(mensaje, "\n}");
+}
+
+void intToChar(int valor, char* str){
+  itoa(valor, str, BASE_STRING_VALOR_SENSOR);
+}
+
+void obtenerJsonValor(char* clave, int pin, char* texto){
+  char c[BASE_STRING_VALOR_SENSOR];
+  char json[TAMANIO_MENSAJE_MQTT];
+
+  intToChar(analogRead(pin),c);
+  obtenerJson(clave, c, json);
+  strcpy(texto, json);
+}
+*/
