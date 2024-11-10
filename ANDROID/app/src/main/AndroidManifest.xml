@@ -52,6 +52,11 @@
             android:name=".AplazoActivity"
             android:exported="false" />
 
+
+        <activity
+            android:name=".HistoricoActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

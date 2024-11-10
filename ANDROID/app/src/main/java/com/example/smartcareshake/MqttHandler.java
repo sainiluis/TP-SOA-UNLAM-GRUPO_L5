@@ -22,7 +22,7 @@ public class MqttHandler implements MqttCallback {
     public static final String PASS="";
 
     public static final String SMART_CARE_PULSO = "/smartcare/pulso";
-    public static final String SMART_CARE_ORINO = "/smartcare/orino";
+    public static final String SMART_CARE = "/smartcare";
     public static final String SMART_CARE_LEVANTO = "/smartcare/levanto";
 
     public static final String ACTION_DATA_RECEIVE ="com.example.intentservice.intent.action.DATA_RECEIVE";
@@ -30,10 +30,19 @@ public class MqttHandler implements MqttCallback {
     private MqttClient client;
     private Context mContext;
 
+    private static MqttHandler instance;
+
     public MqttHandler(Context mContext) {
 
         this.mContext = mContext;
 
+    }
+
+    public static MqttHandler getInstance(Context context) {
+        if (instance == null) {
+            instance = new MqttHandler(context.getApplicationContext());
+        }
+        return instance;
     }
 
     public void connect( String brokerUrl, String clientId,String username, String password) {

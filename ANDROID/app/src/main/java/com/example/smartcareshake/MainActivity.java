@@ -2,6 +2,7 @@ package com.example.smartcareshake;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -17,12 +18,25 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
+import java.util.Iterator;
+import java.util.Random;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import com.example.smartcareshake.EstadoHistorico;
+
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
     ImageView logoView;
     private static final String TAG = "MainActivity";
 
+    private static final String PREFS_NAME = "MyAppPreferences";
+    private static final String COUNTER_KEY = "contadorEstados";
+    private Map<String, EstadoHistorico> contadorEstados = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "Ejecuta: OnCreate");
@@ -66,8 +84,30 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+//        String[] estados = { "PacienteOrino", "PacienteSeLevanto", "PacienteLlamo"};
+//        Map<String, EstadoHistorico> contadorEstados = new HashMap<>();
+//
+//        for (int i = 0; i <20; i++) {
+//            Random random = new Random();
+//            int randomIndex = random.nextInt(3);
+//            String estadoActual = estados[randomIndex];; // Alterna entre "Orino", "Levanto", y "Llamo"
+//
+//            // Verificamos si el estado ya existe en el mapa
+//            if (contadorEstados.containsKey(estadoActual)) {
+//                // Si existe, incrementamos las ocurrencias
+//                contadorEstados.get(estadoActual).incrementarOcurrencias();
+//            } else {
+//                // Si no existe, creamos un nuevo EstadoHistorico con la ocurrencia inicial
+//                EstadoHistorico estado = new EstadoHistorico(estadoActual);
+//                contadorEstados.put(estadoActual, estado);
+//            }
+//        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        loadContadorEstados();
+
 
         // Configurar el título, estado y párrafo iniciales
         TextView txtEstado = findViewById(R.id.button_3);  // Botón que muestra el estado actual
@@ -78,15 +118,22 @@ public class MainActivity extends AppCompatActivity {
         //Animation rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate);
         //logoView.startAnimation(rotateAnimation);
 
-
-        // Botón "Ver últimas alertas"
-        Button buttonAlerts = findViewById(R.id.button_4);
-        buttonAlerts.setOnClickListener(new View.OnClickListener() {
+        Button buttonHistorico = findViewById(R.id.button_5);
+        buttonHistorico.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                startActivity(intent);
-                finish();
+
+                saveContadorEstados();
+               // mqttHandler.disconnect();
+                try{
+                    Intent Historicointent = new Intent(MainActivity.this, HistoricoActivity.class);
+                    Historicointent.putExtra("contadorEstados", (Serializable) contadorEstados);
+                    startActivity(Historicointent);
+                } catch(Exception e) {
+                    Log.i(TAG, "Error",e);
+                }
+
+
             }
         });
 
@@ -115,7 +162,10 @@ public class MainActivity extends AppCompatActivity {
         txtEstado.setText(estado);
 
         // Verificar si el estado requiere pasar a SecondActivity
-        if ("PacienteLlamo".equals(estado) || "PacienteOrino".equals(estado) || "PacienteSeLevanto".equals(estado)) {
+        if ("Paciente Llamo".equals(estado) || "Paciente Orino".equals(estado) || "Paciente Se Levanto".equals(estado)) {
+
+            saveContadorEstados();
+
             // Desconectar MQTT antes de cambiar de actividad
             mqttHandler.disconnect();
 
@@ -127,7 +177,65 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void agregarEstadoAlHistorial(String estado) {
+        if ("Paciente Llamo".equals(estado) || "Paciente Orino".equals(estado) || "Paciente Se Levanto".equals(estado)) {
+            // Si el estado ya existe en el mapa, incrementa el contador de ocurrencias
+            if (contadorEstados.containsKey(estado)) {
+                EstadoHistorico estadoExistente = contadorEstados.get(estado);
+                estadoExistente.incrementarOcurrencias(); // Asegúrate de que este método esté incrementando el valor correctamente
+            } else {
+                // Si el estado no existe en el mapa, crea un nuevo objeto y agrégalo al mapa
+                EstadoHistorico estadoNuevo = new EstadoHistorico(estado);
+                contadorEstados.put(estado, estadoNuevo);
+            }
+        }
+    }
 
+    private void loadContadorEstados() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        contadorEstados = new HashMap<>();
+
+        // Recuperar el JSON guardado en SharedPreferences
+        String jsonString = prefs.getString("contadorEstados", null);
+        if (jsonString != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(jsonString);
+                Iterator<String> keys = jsonObject.keys();
+
+                // Convertir el JSON a un HashMap de <String, EstadoHistorico>
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    int ocurrencias = jsonObject.getInt(key);
+
+                    // Crear un nuevo EstadoHistorico y asignar el número de ocurrencias
+                    EstadoHistorico estadoHistorico = new EstadoHistorico(key);
+                    estadoHistorico.setOcurrencias(ocurrencias);
+
+                    contadorEstados.put(key, estadoHistorico);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void saveContadorEstados() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.clear(); // Limpia los valores anteriores
+
+        // Guardar el HashMap contadorEstados en SharedPreferences como un JSON String
+        JSONObject json = new JSONObject();
+        for (Map.Entry<String, EstadoHistorico> entry : contadorEstados.entrySet()) {
+            try {
+                json.put(entry.getKey(), entry.getValue().getOcurrencias());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        editor.putString("contadorEstados", json.toString());
+        editor.apply(); // Guardar cambios de forma asincrónica
+    }
 
 
     private void connect()
@@ -140,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
             Thread.sleep(1000);
             //subscribeToTopic(MqttHandler.TOPIC_BOTON);
-            subscribeToTopic(MqttHandler.SMART_CARE_ORINO);
+            subscribeToTopic(MqttHandler.SMART_CARE);
 
             Log.d("Main activity","Conectado correctamente");
             Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
@@ -173,16 +281,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    public void onClick(View v) {
-        // Ejemplo de navegación y mensaje
-        txt_main.setText("INICIANDO APP...");
-        Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-        String current_date = LocalDateTime.now().toString();
-        intent.putExtra("date", current_date);
-        startActivity(intent);
-        finish();
-    }
 
     @Override
     protected void onResume() {
@@ -274,6 +372,7 @@ public class MainActivity extends AppCompatActivity {
                     if (newMessage.has("estado")) {
                         String estado = newMessage.getString("estado");
                         globalState.put("estado", estado);
+                        agregarEstadoAlHistorial(estado);
                         actualizarEstado(estado); // Verificar si se necesita cambiar a SecondActivity
                     }
 

@@ -45,6 +45,8 @@
         private Button buttonEstadoAlerta;
         private Button buttonValorSensor;
 
+        private String estado_actual;
+
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +58,11 @@
             buttonValorSensor = findViewById(R.id.button_valor_sensor);
 
             // Obtiene el valor del estado alerta (este valor se envió desde la main activity
-            String estadoAlerta = getIntent().getStringExtra("estado_alerta");
+            estado_actual = getIntent().getStringExtra("estado_alerta");
 
             // Actualiza los botones con los valores recibidos
-            if (estadoAlerta != null) {
-                buttonEstadoAlerta.setText("Estado: " + estadoAlerta);
+            if (estado_actual != null) {
+                buttonEstadoAlerta.setText("Estado: " + estado_actual);
             } else {
                 buttonEstadoAlerta.setText("Estado: No disponible");
             }
@@ -69,6 +71,7 @@
 
 
             mqttHandler = new MqttHandler(getApplicationContext());
+            mqttHandler = MqttHandler.getInstance(this);
 
             if (mqttHandler != null) {
                 Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
@@ -102,10 +105,47 @@
 
             Button btnAplazar = findViewById(R.id.button_aplazar);
             btnAplazar.setOnClickListener(v -> {
+
+                // si el paciente se levantó, esta alerta no puede aplazarse
+                if ("Paciente Se Levanto".equals(estado_actual)) {
+
+                    // Pausar la notificación, asi el mensaje se escucha correctamente
+                    if (mediaPlayerNotification != null && mediaPlayerNotification.isPlaying()) {
+                        mediaPlayerNotification.pause();
+                    }
+
+                    MediaPlayer mediaPlayerImposibilidad = MediaPlayer.create(this, R.raw.imposibilidad_de_aplazo);
+                    mediaPlayerImposibilidad.start();
+
+                    // Liberar recursos y reanudar notificación cuando termine el audio de imposibilidad
+                    mediaPlayerImposibilidad.setOnCompletionListener(mp -> {
+                        mp.release();
+                        if (mediaPlayerNotification != null) {
+                            mediaPlayerNotification.start();
+                        }
+                    });
+
+                    Toast.makeText(this, "Esta alerta no puede ser aplazada", Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+
                 aplazarSolicitud();
 
+                Handler handler = new Handler();
+                int totalMessages = 10;
+                int delay = 70; // en milisegundos
+
+                for (int i = 0; i < totalMessages; i++) {
+                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * delay);
+                }
+
+
+
                 Intent intent = new Intent(SecondActivity.this, AplazoActivity.class);
+                intent.putExtra("estado_actual", estado_actual);
                 startActivity(intent);
+                //finish();
             });
         }
 
@@ -125,13 +165,6 @@
             shake = shake * 0.9f + delta;
 
             if (shake > 12) {
-                aplazarSolicitud();
-
-                // Nos movemos a la activity del aplazo
-                Intent intent = new Intent(SecondActivity.this, AplazoActivity.class);
-                startActivity(intent);
-
-                shakeEnabled = false;
 
                 // Bloqueamos la activación del shake por 10 segundos
                 // esto lo hicimos porque sino permitía hacer muchos shakes juntos, y no quedaba bien el sonido de alerta
@@ -141,6 +174,51 @@
                         shakeEnabled = true;
                     }
                 }, Constants.TIEMPO_APLAZO); // 10 segundos
+
+                if ("Paciente Se Levanto".equals(estado_actual)) {
+
+                    // Pausamos la notificación asi se escucha bien la voz
+                    if (mediaPlayerNotification != null && mediaPlayerNotification.isPlaying()) {
+                        mediaPlayerNotification.pause();
+                    }
+
+                    MediaPlayer mediaPlayerImposibilidad = MediaPlayer.create(this, R.raw.imposibilidad_de_aplazo);
+                    mediaPlayerImposibilidad.start();
+
+                    // Liberar recursos y reanudar notificación cuando termine el audio de imposibilidad
+                    mediaPlayerImposibilidad.setOnCompletionListener(mp -> {
+                        mp.release();
+                        if (mediaPlayerNotification != null) {
+                            mediaPlayerNotification.start();
+                        }
+                    });
+
+                    Toast.makeText(this, "Esta alerta no puede ser aplazada", Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                aplazarSolicitud();
+
+                Handler handler = new Handler();
+                int totalMessages = 20;
+                int delay = 150; // en milisegundos
+
+                for (int i = 0; i < totalMessages; i++) {
+                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * delay);
+                }
+
+                // Nos movemos a la activity del aplazo
+                Intent intent = new Intent(SecondActivity.this, AplazoActivity.class);
+                intent.putExtra("estado_actual", estado_actual);
+                startActivity(intent);
+
+
+                shakeEnabled = false;
+
+
+
+                //finish();
             }
         }
 
@@ -156,7 +234,7 @@
             mediaPlayerNotification.pause();
 
             // Reproduce el sonido cuando se aplaza la solicitud
-            MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.text_to_voice_alerta_aplazada);
+            MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.voz_alerta_aplazada);
             mediaPlayer.start();
 
             // Vibración
@@ -186,34 +264,120 @@
         @Override
         protected void onPause() {
             super.onPause();
-            sensorManager.unregisterListener(this);
+
             Log.i(TAG, "Ejecuta: OnPause");
+
+            if (mediaPlayerNotification != null && mediaPlayerNotification.isPlaying()) {
+                mediaPlayerNotification.pause();
+            }
+
+            sensorManager.unregisterListener(this);
+
+
+            try {
+                unregisterReceiver(receiver);
+                unregisterReceiver(connectionLost);
+                Log.i(TAG, "SecondActivity: Receptores desregistrados en onPause");
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Error al desregistrar receptores: " + e.getMessage());
+            }
         }
 
         @Override
         protected void onDestroy() {
-            try {
-                mqttHandler.disconnect();
-                unregisterReceiver(receiver);
-                unregisterReceiver(connectionLost);
-            } catch (Exception e) {
-                Log.e(TAG, "Error al liberar recursos", e);
-            }
+
             super.onDestroy();
+
+            // Desregistrar el listener del sensor en un bloque separado
+            try {
+                if (sensorManager != null) {
+                    sensorManager.unregisterListener(this);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error al desregistrar listener del sensor: " + e.getMessage());
+            }
+
+            // Detener la notificación
+            try {
+                if (mediaPlayerNotification != null) {
+                    mediaPlayerNotification.stop();
+                    mediaPlayerNotification.release();
+                    mediaPlayerNotification = null;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error al detener y liberar mediaPlayerNotification: " + e.getMessage());
+            }
+
+            try {
+                if (mqttHandler != null) {
+                    mqttHandler.disconnect();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error al desconectar mqttHandler: " + e.getMessage());
+            }
+
+            try {
+
+                if (receiver != null) {
+                    unregisterReceiver(receiver);
+                }
+
+                if (connectionLost != null) {
+                    unregisterReceiver(connectionLost);
+                }
+
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error al realizar el unregister Receiver", e);
+            }
+
         }
 
         @Override
         protected void onResume() {
             super.onResume();
+
+            Log.e(TAG, "Ejecuta onResume");
+
+            // Obtiene el valor del estado alerta (este valor se envió desde la main activity
+            estado_actual = getIntent().getStringExtra("estado_alerta");
+
+            // Actualiza los botones con los valores recibidos
+            if (estado_actual != null) {
+                buttonEstadoAlerta.setText("Estado: " + estado_actual);
+            } else {
+                buttonEstadoAlerta.setText("Estado: No disponible");
+            }
+
+            // Obtiene el valor del estado alerta (este valor se envió desde la main activity
+            estado_actual = getIntent().getStringExtra("estado_actual");
+
+            // Actualiza los botones con los valores recibidos
+            if (estado_actual != null) {
+                buttonEstadoAlerta.setText("Estado: " + estado_actual);
+            } else {
+                estado_actual = getIntent().getStringExtra("estado_alerta");
+            }
+
+            try{
+                configurarBroadcastReciever();
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Error al configurar el BroadcastReciver: " + e.getMessage());
+            }
+
+
+
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 
             // se reactiva el sonido de alerta
-            mediaPlayerNotification.start();
+            if (mediaPlayerNotification != null) {
+                mediaPlayerNotification.start();
+            }
         }
 
 
         private void publishMessage(String topic, String message){
-            Toast.makeText(this, "Publishing message: " + message, Toast.LENGTH_SHORT).show();
             mqttHandler.publish(topic,message);
         }
         private void subscribeToTopic(String topic){
@@ -231,7 +395,7 @@
 
                 Thread.sleep(1000);
                 //subscribeToTopic(MqttHandler.TOPIC_BOTON);
-                subscribeToTopic(MqttHandler.SMART_CARE_ORINO);
+                subscribeToTopic(MqttHandler.SMART_CARE);
 
                 Log.i(TAG,"Conectado correctamente");
                 Log.i(TAG, "Estado de conexión MQTT: " + mqttHandler.isConnected());
@@ -273,6 +437,20 @@
                 if (msgJson != null && msgJson.contains("\"confirmar\": \"true\"")) {
                     Log.i("SecondActivity", "Confirmación recibida. Regresando a MainActivity...");
 
+                    if (mediaPlayerNotification != null && mediaPlayerNotification.isPlaying()) {
+                        mediaPlayerNotification.pause();
+                    }
+
+                    // Reproducir el audio de confirmación
+                    MediaPlayer mediaPlayerConfirmacion = MediaPlayer.create(context, R.raw.voz_alerta_confirmada);
+                    mediaPlayerConfirmacion.start();
+
+                    // Liberar recursos del MediaPlayer una vez que finalice el audio
+                    mediaPlayerConfirmacion.setOnCompletionListener(mp -> {
+                        mp.release();
+                    });
+
+
                     // Desconectar MQTT y cerrar SecondActivity
                     mqttHandler.disconnect();
 
@@ -299,6 +477,24 @@
                         e.printStackTrace();
                         Log.e("SecondActivity", "Error al procesar JSON: " + e.getMessage());
                     }
+                }
+
+                // Verificar si el mensaje contiene "estado" y su valor es uno de los valores permitidos
+                try {
+                    JSONObject jsonObject = new JSONObject(msgJson);
+                    if (jsonObject.has("estado")) {
+                        String estado = jsonObject.getString("estado");
+
+                        if (estado.equals("Paciente Llamo") || estado.equals("Paciente Orino") || estado.equals("Paciente Se Levanto")) {
+
+                            Button buttonEstadoAlerta = findViewById(R.id.button_estado_alerta);
+                            buttonEstadoAlerta.setText("Estado: " + estado);
+                            estado_actual = estado;
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("SecondActivity", "Error al procesar JSON: " + e.getMessage());
                 }
 
             }
