@@ -12,22 +12,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.os.Process;
 import android.widget.Toast;
-import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
 import java.util.Iterator;
-import java.util.Random;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import com.example.smartcareshake.EstadoHistorico;
 
 
 
@@ -43,12 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private MqttHandler mqttHandler;
     private JSONObject globalState;
 
-    private TextView txtJson;
-    private TextView txtEstado;
-    private Button cmdLedApagar;
-    private Button cmdLedEncender;
-    private Button navigateButton;
-
 
     public IntentFilter filterReceive;
     public IntentFilter filterConncetionLost;
@@ -56,13 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ConnectionLost connectionLost =new ConnectionLost();
 
     private Handler handler = new Handler();
-    private int dotCount = 0;
-    private String baseText = "Monitoreando";
 
-    Button button_start;
-    TextView txt_main;
-    ImageView curtainView;
-    ImageView logoView;
     private static final String TAG = "MainActivity";
 
     private static final String PREFS_NAME = "MyAppPreferences";
@@ -83,26 +62,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-//        String[] estados = { "PacienteOrino", "PacienteSeLevanto", "PacienteLlamo"};
-//        Map<String, EstadoHistorico> contadorEstados = new HashMap<>();
-//
-//        for (int i = 0; i <20; i++) {
-//            Random random = new Random();
-//            int randomIndex = random.nextInt(3);
-//            String estadoActual = estados[randomIndex];; // Alterna entre "Orino", "Levanto", y "Llamo"
-//
-//            // Verificamos si el estado ya existe en el mapa
-//            if (contadorEstados.containsKey(estadoActual)) {
-//                // Si existe, incrementamos las ocurrencias
-//                contadorEstados.get(estadoActual).incrementarOcurrencias();
-//            } else {
-//                // Si no existe, creamos un nuevo EstadoHistorico con la ocurrencia inicial
-//                EstadoHistorico estado = new EstadoHistorico(estadoActual);
-//                contadorEstados.put(estadoActual, estado);
-//            }
-//        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -113,10 +72,8 @@ public class MainActivity extends AppCompatActivity {
         TextView txtEstado = findViewById(R.id.button_3);  // Botón que muestra el estado actual
         txtEstado.setText("Monitoreando...");
 
-        // Configurar la animación del logo
+        // Configurar logo
         ImageView logoView = findViewById(R.id.logoView);
-        //Animation rotateAnimation = AnimationUtils.loadAnimation(this, R.anim.rotate);
-        //logoView.startAnimation(rotateAnimation);
 
         Button buttonHistorico = findViewById(R.id.button_5);
         buttonHistorico.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 saveContadorEstados();
-               // mqttHandler.disconnect();
                 try{
                     Intent Historicointent = new Intent(MainActivity.this, HistoricoActivity.class);
                     Historicointent.putExtra("contadorEstados", (Serializable) contadorEstados);
@@ -149,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         // Configurar BroadcastReceiver y conexión con retraso
         if (!mqttHandler.isConnected()) {
             configurarBroadcastReciever();
-            new Handler().postDelayed(() -> connect(), 500); // 500 ms de retraso
+            new Handler().postDelayed(() -> connect(), Constants.DELAY_CONNECT_MQTT); // 500 ms de retraso
         }
 
         Animation pulseAnimation = AnimationUtils.loadAnimation(this, R.anim.pulse);
@@ -247,7 +203,6 @@ public class MainActivity extends AppCompatActivity {
         try {
 
             Thread.sleep(1000);
-            //subscribeToTopic(MqttHandler.TOPIC_BOTON);
             subscribeToTopic(MqttHandler.SMART_CARE);
 
             Log.d("Main activity","Conectado correctamente");
@@ -295,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "Reconectando MQTT después de 5 segundos en onResume...");
                 connect();
             }
-        }, 5000); // 5000 milisegundos = 5 segundos de delay
+        }, Constants.DELAY_RECONNECT_MQTT); // 5000 milisegundos = 5 segundos de delay
 
 
 
@@ -311,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        //mqttHandler.disconnect(); // Desconecta MQTT al salir de la actividad
         Log.i(TAG, "Ejecuta: OnPause");
     }
 

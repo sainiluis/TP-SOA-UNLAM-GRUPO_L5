@@ -22,11 +22,10 @@ public class SplashActivity extends AppCompatActivity {
 
         // Se usa este handler  para retrasar la ejecución de la main activity
         // Y esperar a que el splash haya terminado
-        int splashScreenDuration = 1400; // Duración del splash en milisegundos
+        int splashScreenDuration = Constants.SPLASH_SCREEN_DURATION; // Duración del splash en milisegundos
         new Handler().postDelayed(() -> {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
             startActivity(intent);
-            //overridePendingTransition(0, 0);
             finish();
         }, splashScreenDuration);
     }

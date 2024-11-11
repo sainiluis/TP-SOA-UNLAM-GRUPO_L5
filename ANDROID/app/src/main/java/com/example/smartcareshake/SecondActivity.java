@@ -18,10 +18,8 @@
     import android.os.Vibrator;
     import android.util.Log;
     import android.widget.Button;
-    import android.widget.TextView;
     import android.widget.Toast;
     import androidx.appcompat.app.AppCompatActivity;
-    import android.content.BroadcastReceiver;
 
     import org.json.JSONException;
     import org.json.JSONObject;
@@ -86,7 +84,7 @@
                 configurarBroadcastReciever();
 
                 // Usamos este handler para que la conexión se haga unos ms después. ya que si no el pasaje del splash a la MainActivity no era ligero y se trababa.
-                new Handler().postDelayed(() -> connect(), 500); // 500 ms de retraso
+                new Handler().postDelayed(() -> connect(), Constants.DELAY_CONNECT_MQTT); // 500 ms de retraso
             }
 
             // Sonido de alerta en loop
@@ -133,11 +131,9 @@
                 aplazarSolicitud();
 
                 Handler handler = new Handler();
-                int totalMessages = 10;
-                int delay = 70; // en milisegundos
 
-                for (int i = 0; i < totalMessages; i++) {
-                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * delay);
+                for (int i = 0; i < Constants.TOTAL_MESSAGES_APLAZO; i++) {
+                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * Constants.DELAY_MESSAGES_APLAZO);
                 }
 
 
@@ -164,7 +160,7 @@
             float delta = acelVal - acelLast;
             shake = shake * 0.9f + delta;
 
-            if (shake > 12) {
+            if (shake > Constants.UMBRAL_SHAKE) {
 
                 // Bloqueamos la activación del shake por 10 segundos
                 // esto lo hicimos porque sino permitía hacer muchos shakes juntos, y no quedaba bien el sonido de alerta
@@ -201,11 +197,9 @@
                 aplazarSolicitud();
 
                 Handler handler = new Handler();
-                int totalMessages = 20;
-                int delay = 150; // en milisegundos
 
-                for (int i = 0; i < totalMessages; i++) {
-                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * delay);
+                for (int i = 0; i < Constants.TOTAL_MESSAGES_APLAZO; i++) {
+                    handler.postDelayed(() -> publishMessage("/smartcare/aplazo", "a"), i * Constants.DELAY_MESSAGES_APLAZO);
                 }
 
                 // Nos movemos a la activity del aplazo
@@ -240,7 +234,7 @@
             // Vibración
             Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             if (vibrator != null && vibrator.hasVibrator()) {
-                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)); // 500 ms de vibración
+                vibrator.vibrate(VibrationEffect.createOneShot(Constants.VIBRATION_EFFECT_DURATION, VibrationEffect.DEFAULT_AMPLITUDE)); // 500 ms de vibración
             }
 
             // Flash Luz
@@ -249,9 +243,9 @@
                 String cameraId = camManager.getCameraIdList()[0]; // 0 es la cámara trasera
                 for (int i = 0; i < 2; i++) {
                     camManager.setTorchMode(cameraId, true);  // Flash ON
-                    Thread.sleep(200);  // Pausa 200ms
+                    Thread.sleep(Constants.PAUSE_FLASH_DURATION);  // Pausa 200ms
                     camManager.setTorchMode(cameraId, false); // Flash OFF
-                    Thread.sleep(200);  // Pausa 200ms
+                    Thread.sleep(Constants.PAUSE_FLASH_DURATION);  // Pausa 200ms
                 }
             } catch (CameraAccessException | InterruptedException e) {
                 e.printStackTrace();
@@ -394,7 +388,6 @@
             try {
 
                 Thread.sleep(1000);
-                //subscribeToTopic(MqttHandler.TOPIC_BOTON);
                 subscribeToTopic(MqttHandler.SMART_CARE);
 
                 Log.i(TAG,"Conectado correctamente");

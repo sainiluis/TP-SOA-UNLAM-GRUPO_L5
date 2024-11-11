@@ -132,8 +132,7 @@ public class AplazoActivity extends AppCompatActivity {
 
         try {
 
-            Thread.sleep(1000);
-            //subscribeToTopic(MqttHandler.TOPIC_BOTON);
+            Thread.sleep(Constants.THREAD_SLEEP);
             subscribeToTopic(MqttHandler.SMART_CARE);
 
             Log.i(TAG,"Conectado correctamente");
