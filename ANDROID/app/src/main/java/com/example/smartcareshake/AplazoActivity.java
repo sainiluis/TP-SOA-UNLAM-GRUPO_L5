@@ -58,16 +58,6 @@ public class AplazoActivity extends AppCompatActivity {
             Log.i(TAG, "mqttHandler es null");
         }
 
-
-        //if (!mqttHandler.isConnected()) {
-            // Configuramos el Broadcast receiver
-
-         //   configurarBroadcastReciever();
-
-            // Usamos este handler para que la conexión se haga unos ms después. ya que si no el pasaje del splash a la MainActivity no era ligero y se trababa.
-         //   new Handler().postDelayed(() -> connect(), 500); // 500 ms de retraso
-       // }
-
         // Contador para el tiempo restante de aplazo
         countDownTimer = new CountDownTimer(Constants.TIEMPO_APLAZO, Constants.COUNTDOWN) {  // (por ahora ponemos 10 seg pero en realidad deberia ser 120 seg)
             public void onTick(long millisUntilFinished) {
@@ -99,20 +89,6 @@ public class AplazoActivity extends AppCompatActivity {
         unregisterReceiver(receiver);
 
         super.onDestroy();
-
-
-
-        // try {
-        //    if (mqttHandler != null) {
-           //     mqttHandler.disconnect();
-          //  }
-           // unregisterReceiver(receiver);
-           // unregisterReceiver(connectionLost);
-
-
-       // } catch (Exception e) {
-           // Log.e(TAG, "Error al liberar recursos", e);
-       // }
 
     }
 
