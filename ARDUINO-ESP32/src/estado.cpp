@@ -520,27 +520,3 @@ String obtenerJson(std::vector<const char*> claves, std::vector<const char*> val
 
   return json;
 }
-
-/*
-// Funciones JSON
-void obtenerJson(const char* clave, const char* valor, char* mensaje){
-  strcpy(mensaje, "{\n\"");
-  strcat(mensaje, clave);
-  strcat(mensaje, "\": ");
-  strcat(mensaje, valor);
-  strcat(mensaje, "\n}");
-}
-
-void intToChar(int valor, char* str){
-  itoa(valor, str, BASE_STRING_VALOR_SENSOR);
-}
-
-void obtenerJsonValor(char* clave, int pin, char* texto){
-  char c[BASE_STRING_VALOR_SENSOR];
-  char json[TAMANIO_MENSAJE_MQTT];
-
-  intToChar(analogRead(pin),c);
-  obtenerJson(clave, c, json);
-  strcpy(texto, json);
-}
-*/
